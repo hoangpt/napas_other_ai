@@ -1,0 +1,4 @@
+# Thông tin lãnh đạo Napas (ví dụ)
+Nguyễn Văn A - Tổng Giám đốc
+Trần Thị B - Phó Tổng Giám đốc
+...

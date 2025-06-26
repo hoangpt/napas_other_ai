@@ -1,0 +1,44 @@
+<!-- Floating Robot Chat Button: Khi click sẽ chuyển sang trang chat mới giống giao diện ChatGPT -->
+
+<style>
+  #chatbot-fab {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 64px;
+    height: 64px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 9999;
+    transition: box-shadow 0.2s;
+  }
+  #chatbot-fab:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+  }
+</style>
+
+<div id="chatbot-fab" title="Chat với Napas Bot">
+  <svg width="42" height="42" viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="38" rx="22" ry="20" fill="#90caf9"/>
+    <ellipse cx="32" cy="38" rx="18" ry="16" fill="#fff"/>
+    <circle cx="24" cy="36" r="4" fill="#0066cc"/>
+    <circle cx="40" cy="36" r="4" fill="#0066cc"/>
+    <rect x="27" y="48" width="10" height="4" rx="2" fill="#0066cc"/>
+    <rect x="30" y="13" width="4" height="9" rx="2" fill="#90caf9"/>
+    <circle cx="32" cy="10" r="3" fill="#0066cc" stroke="#90caf9" stroke-width="2"/>
+  </svg>
+</div>
+
+<script>
+  // Thay đổi URL này tới trang giao diện chat thật sự của bạn (giả sử /chatbot hoặc /napas-chat)
+  const CHATBOT_CHAT_URL = "/chatbot-gpt-ui.html";
+
+  document.getElementById('chatbot-fab').onclick = function() {
+    window.open(CHATBOT_CHAT_URL, '_blank');
+  };
+</script>

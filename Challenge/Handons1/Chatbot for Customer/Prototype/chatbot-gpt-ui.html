@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Napas Chatbot - Chat GPT UI</title>
+  <meta name="viewport" content="width=480, user-scalable=no">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f7f7f8;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      color: #222;
+    }
+    .chatgpt-header {
+      background: #0066cc;
+      color: #fff;
+      padding: 18px 24px;
+      font-size: 1.25em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .chatgpt-header svg {
+      vertical-align: middle;
+    }
+    .chatgpt-main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .chatgpt-sidebar {
+      width: 220px;
+      background: #eceff1;
+      padding: 18px 10px 0 10px;
+      display: none; /* Hide sidebar for prototype */
+      flex-shrink: 0;
+      border-right: 1px solid #e0e0e0;
+    }
+    .chatgpt-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      border-radius: 0 0 12px 12px;
+    }
+    .chatgpt-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 0 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: #f7f7f8;
+      scroll-behavior: smooth;
+    }
+    .message-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 0 24px;
+      max-width: 100vw;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #e3ecf6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4em;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .avatar.user {
+      background: #0066cc;
+      color: #fff;
+    }
+    .avatar.bot {
+      background: #e3ecf6;
+      color: #0066cc;
+    }
+    .message {
+      flex: 1;
+      border-radius: 10px;
+      padding: 15px 18px;
+      font-size: 1.09em;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      word-break: break-word;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      min-height: 24px;
+    }
+    .message.user {
+      background: #e9f1fa;
+      color: #222;
+    }
+    .message.bot {
+      background: #fff;
+      color: #222;
+    }
+    .chatgpt-input-bar {
+      border-top: 1px solid #e0e0e0;
+      background: #fcfcfd;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .chatgpt-input-bar input {
+      flex: 1;
+      border: 1px solid #d0dbe7;
+      border-radius: 24px;
+      padding: 12px 18px;
+      font-size: 1.09em;
+      outline: none;
+      background: #f8fafd;
+      transition: border 0.17s;
+    }
+    .chatgpt-input-bar input:focus {
+      border: 1.5px solid #0066cc;
+      background: #fff;
+    }
+    .chatgpt-input-bar button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #0066cc;
+      color: #fff;
+      font-size: 1.35em;
+      cursor: pointer;
+      transition: background 0.17s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chatgpt-input-bar button:disabled {
+      background: #b8cbe5;
+      cursor: not-allowed;
+    }
+    .message-row.user {
+      flex-direction: row-reverse;
+    }
+    .message.user {
+      background: #eaf3fb;
+    }
+    @media (max-width: 800px) {
+      .chatgpt-content { border-radius: 0; box-shadow:none; }
+      .chatgpt-main { padding: 0; }
+    }
+    /* Loading animation for bot */
+    .loading-dots {
+      display: inline-block;
+      font-size: 1.5em;
+      letter-spacing: 2px;
+      color: #0066cc;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatgpt-header">
+    <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+      <ellipse cx="32" cy="38" rx="22" ry="20" fill="#90caf9"/>
+      <ellipse cx="32" cy="38" rx="18" ry="16" fill="#fff"/>
+      <circle cx="24" cy="36" r="4" fill="#0066cc"/>
+      <circle cx="40" cy="36" r="4" fill="#0066cc"/>
+      <rect x="27" y="48" width="10" height="4" rx="2" fill="#0066cc"/>
+      <rect x="30" y="13" width="4" height="9" rx="2" fill="#90caf9"/>
+      <circle cx="32" cy="10" r="3" fill="#0066cc" stroke="#90caf9" stroke-width="2"/>
+    </svg>
+    Napas Chatbot
+  </div>
+  <div class="chatgpt-main">
+    <!-- <div class="chatgpt-sidebar"> ... </div> -->
+    <div class="chatgpt-content">
+      <div id="messages" class="chatgpt-messages">
+        <!-- Chat bubbles will be rendered here -->
+      </div>
+      <form class="chatgpt-input-bar" id="chat-form" autocomplete="off">
+        <input type="text" id="chat-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" />
+        <button id="send-btn" type="submit" title="Gửi"><span>➤</span></button>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Simple in-memory message list for demo
+    const messages = [
+      {
+        sender: 'bot',
+        text: 'Xin chào! Tôi là Napas Chatbot. Bạn muốn hỏi gì? (ví dụ: "FAQ", "Sản phẩm", "Lãnh đạo"...)'
+      }
+    ];
+
+    // DOM elements
+    const messageList = document.getElementById('messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatForm = document.getElementById('chat-form');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Render message
+    function renderMessages() {
+      messageList.innerHTML = '';
+      messages.forEach(msg => {
+        const row = document.createElement('div');
+        row.className = 'message-row ' + (msg.sender === 'user' ? 'user' : 'bot');
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar ' + (msg.sender === 'user' ? 'user' : 'bot');
+        avatar.innerHTML = msg.sender === 'user'
+          ? '<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#0066cc"/><text x="14" y="18" text-anchor="middle" fill="#fff" font-size="16" font-family="Arial" font-weight="700">U</text></svg>'
+          : '<svg width="28" height="28" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="38" rx="22" ry="20" fill="#90caf9"/><ellipse cx="32" cy="38" rx="18" ry="16" fill="#fff"/><circle cx="24" cy="36" r="4" fill="#0066cc"/><circle cx="40" cy="36" r="4" fill="#0066cc"/><rect x="27" y="48" width="10" height="4" rx="2" fill="#0066cc"/><rect x="30" y="13" width="4" height="9" rx="2" fill="#90caf9"/><circle cx="32" cy="10" r="3" fill="#0066cc" stroke="#90caf9" stroke-width="2"/></svg>';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message ' + (msg.sender === 'user' ? 'user' : 'bot');
+        bubble.textContent = msg.text;
+
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+
+        messageList.appendChild(row);
+      });
+      // Scroll to bottom
+      setTimeout(() => {
+        messageList.scrollTop = messageList.scrollHeight;
+      }, 75);
+    }
+
+    // Add a message
+    function addMessage(text, sender = 'user') {
+      messages.push({ text, sender });
+      renderMessages();
+    }
+
+    // Simulate bot reply
+    function botReply(userText) {
+      // Loading dots
+      const loadingRow = document.createElement('div');
+      loadingRow.className = 'message-row bot';
+      const botAvatar = document.createElement('div');
+      botAvatar.className = 'avatar bot';
+      botAvatar.innerHTML = '<svg width="28" height="28" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="38" rx="22" ry="20" fill="#90caf9"/><ellipse cx="32" cy="38" rx="18" ry="16" fill="#fff"/><circle cx="24" cy="36" r="4" fill="#0066cc"/><circle cx="40" cy="36" r="4" fill="#0066cc"/><rect x="27" y="48" width="10" height="4" rx="2" fill="#0066cc"/><rect x="30" y="13" width="4" height="9" rx="2" fill="#90caf9"/><circle cx="32" cy="10" r="3" fill="#0066cc" stroke="#90caf9" stroke-width="2"/></svg>';
+      const loadingBubble = document.createElement('div');
+      loadingBubble.className = 'message bot';
+      loadingBubble.innerHTML = '<span class="loading-dots">...</span>';
+      loadingRow.appendChild(botAvatar);
+      loadingRow.appendChild(loadingBubble);
+      messageList.appendChild(loadingRow);
+      messageList.scrollTop = messageList.scrollHeight;
+
+      // Fake "typing" delay then reply
+      setTimeout(() => {
+        loadingRow.remove();
+        let reply = fakeBotLogic(userText);
+        addMessage(reply, 'bot');
+      }, 1100 + Math.random() * 600);
+    }
+
+    // Very simple bot logic for prototype
+    function fakeBotLogic(userText) {
+      const text = userText.trim().toLowerCase();
+      if (text.includes('faq')) {
+        return "Đây là một số câu hỏi thường gặp:\n- Napas là gì?\n- Làm sao để mở thẻ?\n- Biểu phí dịch vụ Napas?";
+      }
+      if (text.includes('lãnh đạo') || text.includes('lanh dao')) {
+        return "Đội ngũ lãnh đạo Napas bao gồm:\n- Ông Nguyễn Quang Hưng (Tổng giám đốc)\n- Bà Nguyễn Thị Hồng (Chủ tịch HĐQT)...";
+      }
+      if (text.includes('sản phẩm') || text.includes('san pham') || text.includes('product')) {
+        return "Các sản phẩm chính của Napas:\n- Thẻ nội địa Napas\n- Dịch vụ chuyển tiền nhanh\n- Thanh toán QR...";
+      }
+      if (text.includes('chào') || text.includes('hello') || text.includes('hi')) {
+        return "Xin chào! Tôi có thể giúp gì cho bạn?";
+      }
+      if (text.includes('cảm ơn') || text.includes('thank')) {
+        return "Rất vui được hỗ trợ bạn! Nếu có thêm câu hỏi hãy tiếp tục chat nhé.";
+      }
+      if (text.match(/(napas|giới thiệu|gioi thieu)/)) {
+        return "Napas là đơn vị cung cấp dịch vụ chuyển mạch tài chính và bù trừ điện tử tại Việt Nam.";
+      }
+      return `Bạn hỏi: "${userText}"\nHiện tại tôi chưa có câu trả lời chính xác. Bạn vui lòng hỏi lại hoặc chọn chủ đề FAQ, Sản phẩm, Lãnh đạo để được hỗ trợ tốt hơn!`;
+    }
+
+    // Form submit (send message)
+    chatForm.onsubmit = function(e) {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      chatInput.value = '';
+      sendBtn.disabled = true;
+      botReply(text);
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }, 1000);
+    };
+
+    // Enter key in input
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Initial render
+    renderMessages();
+  </script>
+</body>
+</html>

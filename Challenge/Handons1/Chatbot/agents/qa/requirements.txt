@@ -1,2 +1,2 @@
-adk
+google-adk
 requests 
