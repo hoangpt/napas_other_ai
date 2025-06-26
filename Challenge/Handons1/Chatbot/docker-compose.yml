@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  qa:
+    build: ./agents/qa
+    ports:
+      - "8001:8000"
+  frequent_qa:
+    build: ./agents/frequent_qa
+    ports:
+      - "8002:8000"
+  product_advisor:
+    build: ./agents/product_advisor
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./db:/app/db
+  order_retrieval:
+    build: ./agents/order_retrieval
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./db:/app/db 
